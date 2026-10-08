@@ -23,18 +23,23 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Create Skeleton Android Project
+      - name: Recreate Android Project Structure
         run: |
-          flutter create . --platforms=android --org=com.example
+          mkdir temp_app
+          cd temp_app
+          flutter create --platforms=android --org=com.avatar.driving app
+          cp -r app/android ../
+          cd ..
+          rm -rf temp_app
 
       - name: Get Dependencies
         run: flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --debug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: driving-companion-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
