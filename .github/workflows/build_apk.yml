@@ -23,16 +23,20 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Recreate Android Project Structure
+      - name: Create Clean Android Structure
         run: |
-          mkdir temp_app
-          cd temp_app
+          mkdir temp_build
+          cd temp_build
           flutter create --platforms=android --org=com.avatar.driving app
           cp -r app/android ../
           cd ..
-          rm -rf temp_app
-          sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 34/g' android/app/build.gradle || true
-          sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 34/g' android/app/build.gradle || true
+          rm -rf temp_build
+
+      - name: Force CompileSdk 34
+        run: |
+          find android/ -name "build.gradle*" -exec sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 34/g' {} + || true
+          find android/ -name "build.gradle*" -exec sed -i 's/compileSdk = [0-9]*/compileSdk = 34/g' {} + || true
+          find android/ -name "build.gradle*" -exec sed -i 's/flutter.compileSdkVersion/34/g' {} + || true
 
       - name: Get Dependencies
         run: flutter pub get
@@ -44,4 +48,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: driving-companion-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: build/app/outputs/flutter-apk/*.apk
